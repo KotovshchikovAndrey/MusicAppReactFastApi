@@ -26,7 +26,7 @@ class MusicParser:
         self.request_params['q'] = music_title
         async with session.get(url=self.api_url, params=self.request_params) as response:
             json_response = await response.json()
-
+        
         return json_response['items'][0]['id']['videoId']
     
     async def _download_music_file(self, music_title: str) -> None:
@@ -70,7 +70,7 @@ if __name__ == '__main__':
             if input_value == 'exit':
                 break
 
-            file = open(input_value)
+            file = open(input_value, encoding='UTF-8')
             music_title_list = file.readlines()
             file.close()
             break

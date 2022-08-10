@@ -62,6 +62,7 @@ class MusicParser:
         
         await asyncio.gather(*tasks)
 
+
 if __name__ == '__main__':
     music_title_list = []
     while True:

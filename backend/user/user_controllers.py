@@ -56,7 +56,10 @@ async def registration(
     )
 
     if not await user_registration_service.registartion_data_is_valid():
-        raise ApiError.bad_request(msg='Введены невалидные данные!', error_list=user_registration_service.errors)
+        raise ApiError.bad_request(
+            msg='Введены невалидные данные!', 
+            error_list=user_registration_service.errors
+        )
 
     token_service = TokenService(token_repository=TokenRepository(session=session))
     user_id = await user_registration_service.registration()

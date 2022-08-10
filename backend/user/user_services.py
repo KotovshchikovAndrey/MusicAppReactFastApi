@@ -1,3 +1,4 @@
+from asyncio import tasks
 from user.user_repositories import UserRepository, TokenRepository
 from fastapi import Request
 from passlib.context import CryptContext
@@ -5,13 +6,14 @@ import jwt
 from datetime import datetime, timedelta
 from typing import Union
 from user.user_schemas import User
+from user.user_tasks import clear_expired_token_task
 
 
 REFRESH_TOKEN_SECRET_KEY = 'zpijfjkfzkfjzkjfiojijklfnhduofhuhzljfj'
 ACCESS_TOKEN_SECRET_KEY = 'ouhozhfioidmnvndzinifjnzjkldnfkjlnkjznd'
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE = 30
+REFRESH_TOKEN_EXPIRE = 30
 
 
 class TokenService:
@@ -21,7 +23,7 @@ class TokenService:
     
     def create_access_token(self, payload: dict) -> str:
         payload_to_encode = payload.copy()
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE)
         payload_to_encode.update({"exp": expire})
         token = jwt.encode(payload_to_encode, ACCESS_TOKEN_SECRET_KEY, algorithm=ALGORITHM)
 
@@ -29,9 +31,11 @@ class TokenService:
     
     def create_refresh_token(self, payload: dict) -> str:
         payload_to_encode = payload.copy()
-        expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE)
         payload_to_encode.update({"exp": expire})
         token = jwt.encode(payload_to_encode, REFRESH_TOKEN_SECRET_KEY, algorithm=ALGORITHM)
+
+        clear_expired_token_task.apply_async((token, ), eta=expire)
 
         return token
     

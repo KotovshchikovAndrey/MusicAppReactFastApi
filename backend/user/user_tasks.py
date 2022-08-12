@@ -10,7 +10,7 @@ async def _clear_expired_token(token_value: str):
     query = f"DELETE FROM {token_model.__table__} WHERE refresh_token = '{token_value}'"
     await database.execute(query=query)
     
-@app.task
+@app.task(queue='token_queue')
 def clear_expired_token_task(token_value: str):
     asyncio.run(
         _clear_expired_token(

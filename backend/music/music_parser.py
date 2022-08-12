@@ -55,12 +55,9 @@ class MusicParser:
     async def parse_music(self):
         await database.connect()
 
-        tasks = []
-        for title in self.music_titles:
-            task = self._download_music_file(music_title=title)
-            tasks.append(task)
-        
-        await asyncio.gather(*tasks)
+        await asyncio.gather(
+            *[self._download_music_file(music_title=title) for title in self.music_titles]
+        )
 
 
 if __name__ == '__main__':
@@ -80,7 +77,6 @@ if __name__ == '__main__':
 
     if music_title_list:
         parser = MusicParser(api_key=API_KEY, music_titles=music_title_list)
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(parser.parse_music())
+        asyncio.run(parser.parse_music())
 
 

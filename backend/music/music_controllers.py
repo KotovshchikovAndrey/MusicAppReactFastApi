@@ -1,14 +1,14 @@
 from typing import Union
 from fastapi import APIRouter, Depends , status, Response, UploadFile, Body, File, Request
 from requests import Session
-from .music_repositories import MusicRepository
-from .music_services import MusicStreamingService
+from music.music_repositories import MusicRepository
+from music.music_services import MusicStreamingService
 from error.exception_errors import ApiError
 from fastapi.responses import StreamingResponse, JSONResponse
 from db import get_db
 
-
 router = APIRouter(prefix='/music')
+
 
 @router.get('/', status_code=status.HTTP_200_OK)
 async def get_music_list(session: Session = Depends(get_db)):
@@ -16,11 +16,13 @@ async def get_music_list(session: Session = Depends(get_db)):
     all_music = await music_repository.get_all()
     return all_music
 
+
 @router.get('/{music_id}',status_code=status.HTTP_200_OK)
 async def get_music_detail(music_id: int, session: Session = Depends(get_db)):
     music_repository = MusicRepository(session=session)
     music = await music_repository.get_by_id(id=music_id)
     return music
+
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_music(
@@ -33,15 +35,17 @@ async def create_music(
         raise ApiError.bad_request(msg='Загрузите музыкальный файл!')
 
     music_repository = MusicRepository(session=session)
-    await music_repository.create(
+    created_music_id =await music_repository.create(
         title=title,
         description=description,
         music_file=music_file
     )
 
     return {
-        'msg': 'Трек успешно создан!'
+        'msg': 'Трек успешно создан!',
+        'music_id': created_music_id
     }
+
 
 @router.put('/{music_id}', status_code=status.HTTP_200_OK)
 async def update_music(
@@ -57,7 +61,7 @@ async def update_music(
     if music is None:
         raise ApiError.bad_request(msg='Трек с таким id не найден!')
 
-    await music_repository.update(
+    updated_music_id = await music_repository.update(
         id=music_id,
         title=title,
         description=description,
@@ -65,8 +69,10 @@ async def update_music(
     )
 
     return {
-        'msg': 'Трек успешно обновлен!'
+        'msg': 'Трек успешно обновлен!',
+        'music_id': updated_music_id
     }
+
 
 @router.delete('/{music_id}', status_code=status.HTTP_204_NO_CONTENT)   
 async def delete_music(music_id: int, session: Session = Depends(get_db)):
@@ -76,6 +82,7 @@ async def delete_music(music_id: int, session: Session = Depends(get_db)):
     return JSONResponse(
         content={'msg': 'Трек удален!'}
     )
+
 
 @router.get('/stream/{music_id}', status_code=status.HTTP_206_PARTIAL_CONTENT)
 async def get_streaming_music(

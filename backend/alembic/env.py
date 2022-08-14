@@ -1,9 +1,11 @@
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
+from sqlalchemy import engine_from_config, pool, create_engine
 from alembic import context
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -58,11 +60,28 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    TESTING = os.getenv('TESTING')
+
+    DB_URL = f"{os.getenv('DB_URL')}_test" if TESTING else os.getenv('DB_URL')
+    POSTGRES_DB = os.getenv('POSTGRES_DB')
+    # handle testing config for migrations
+    if os.getenv("TESTING"):
+        # connect to primary db
+        default_engine = create_engine(str(os.getenv('DB_URL')), isolation_level="AUTOCOMMIT")
+        # drop testing db if it exists and create a fresh one
+        with default_engine.connect() as default_conn:
+            default_conn.execute(f'DROP DATABASE IF EXISTS "{POSTGRES_DB}_test"')
+            default_conn.execute(f'CREATE DATABASE "{POSTGRES_DB}_test"')
+    
+    connectable = config.attributes.get("connection", None)
+    config.set_main_option("sqlalchemy.url", DB_URL)
+
+    if connectable is None:
+        connectable = engine_from_config(
+            config.get_section(config.config_ini_section),
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
+        )
 
     with connectable.connect() as connection:
         context.configure(

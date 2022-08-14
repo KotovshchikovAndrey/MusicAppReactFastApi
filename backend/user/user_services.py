@@ -7,7 +7,6 @@ from typing import Union
 from user.user_schemas import User
 from user.user_tasks import clear_expired_token_task
 
-
 REFRESH_TOKEN_SECRET_KEY = 'zpijfjkfzkfjzkjfiojijklfnhduofhuhzljfj'
 ACCESS_TOKEN_SECRET_KEY = 'ouhozhfioidmnvndzinifjnzjkldnfkjlnkjznd'
 ALGORITHM = "HS256"

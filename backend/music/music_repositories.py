@@ -13,7 +13,7 @@ class MusicRepository(BaseRepository):
         super().__init__(model=self._music_model)
         self._session_db = session
 
-    async def create(self,title: str, description: str, music_file: UploadFile) -> None:
+    async def create(self,title: str, description: str, music_file: UploadFile) -> dict:
         file_servise = FileManager(file_name=music_file.filename)
         upload_file_name = await file_servise.upload_file(file=music_file)
         
@@ -23,8 +23,7 @@ class MusicRepository(BaseRepository):
             'file_name': upload_file_name
         }
         
-        await super().create(create_data=create_data)
-        return 
+        return await super().create(create_data=create_data)
     
     async def update(
         self,
@@ -46,5 +45,4 @@ class MusicRepository(BaseRepository):
             upload_file_name = await file_servise.upload_file(file=music_file)
             update_data['file_name'] = upload_file_name
             
-        await super().update(id=id, update_data=update_data)
-        return 
+        return await super().update(id=id, update_data=update_data)

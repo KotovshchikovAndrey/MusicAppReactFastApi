@@ -9,14 +9,15 @@ from db import get_db
 from user.user_auth_backend import AuthenticationBackend
 from user.user_schemas import User
 
-
 router = APIRouter(prefix='/user')
+
 
 @router.get('/', status_code=status.HTTP_200_OK)
 async def get_all_users(session: Session = Depends(get_db)):
     user_repository = UserRepository(session=session)
     users = await user_repository.get_all()
     return users
+
 
 @router.get('/refresh', status_code=status.HTTP_200_OK)
 async def refresh(request: Request, session: Session = Depends(get_db)):
@@ -39,11 +40,13 @@ async def refresh(request: Request, session: Session = Depends(get_db)):
 
     return JSONResponse(content=responce_data)
 
+
 @router.get('/{user_id}', status_code=status.HTTP_200_OK)
 async def get_user_detail(user_id: int , session: Session = Depends(get_db)):
     user_repository = UserRepository(session=session)
     user = await user_repository.get_by_id(id=user_id)
     return user
+
 
 @router.post('/registration', status_code=status.HTTP_201_CREATED)
 async def registration(
@@ -77,6 +80,7 @@ async def registration(
     responce.set_cookie(key='refresh_token', value=refresh_token, httponly=True, max_age=60*60*24*30)
     return responce
 
+
 @router.post('/login', status_code=status.HTTP_200_OK)
 async def login(user: UserAuthSchema, session: Session = Depends(get_db)):
     user_auth_service = UserAuthService(user_repository=UserRepository(session=session))
@@ -100,6 +104,7 @@ async def login(user: UserAuthSchema, session: Session = Depends(get_db)):
     responce.set_cookie(key='refresh_token', value=refresh_token, httponly=True, max_age=60*60*24*30)
     return responce 
 
+
 @router.post('/logout', status_code=status.HTTP_200_OK)
 async def logout(request: Request, session: Session = Depends(get_db)):
     token_service = TokenService(token_repository=TokenRepository(session=session))
@@ -113,6 +118,7 @@ async def logout(request: Request, session: Session = Depends(get_db)):
     responce = JSONResponse(content='Вы разлогинены!')
     responce.delete_cookie(key='refresh_token')
     return responce
+
 
 @router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(

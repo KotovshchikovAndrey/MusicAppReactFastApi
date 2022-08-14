@@ -1,14 +1,14 @@
-from pytube import YouTube
+import sys
 import os
-import databases
+
+sys.path.append(os.path.join(sys.path[0], '../../'))
+
+from pytube import YouTube
+from backend.db import database
 import asyncio
 from aiohttp import ClientSession
 
-
 API_KEY = 'AIzaSyDc_a6zS2ugNOvvJQHnnMVcKPwV7EXmyvM'
-DB_URL = "postgresql://postgres:12345@127.0.0.1:5432/Music"
-
-database = databases.Database(DB_URL)
 
 
 class MusicParser:

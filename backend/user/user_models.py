@@ -10,6 +10,7 @@ user_role = Table(
     Column("role_id", ForeignKey("roles.id", ondelete='CASCADE'), primary_key=True),
 )
 
+
 user_favorite_music = Table(
     "user_favorite_music",
     Base.metadata,
@@ -17,12 +18,14 @@ user_favorite_music = Table(
     Column("music_id", ForeignKey("music.id", ondelete='CASCADE'), primary_key=True),
 )
 
+
 user_last_music = Table(
     "user_last_music",
     Base.metadata,
     Column("user_id", ForeignKey("users.id", ondelete='CASCADE'), primary_key=True),
     Column("music_id", ForeignKey("music.id", ondelete='CASCADE'), primary_key=True),
 )
+
 
 class Role(Base):
     __tablename__ = 'roles'

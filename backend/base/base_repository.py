@@ -19,12 +19,21 @@ class BaseRepository:
         return dict(query_dict) if query_dict is not None else None
     
     async def create(self, create_data: dict) -> int:
-        query = self.table.insert().values(**create_data)
+        create_keys = ", ".join(list(create_data.keys()))
+        create_values = ", ".join(map(lambda x: f"'{x}'", list(create_data.values())))
+
+        query = f"""
+                    INSERT INTO {self.table} 
+                        ({create_keys}) VALUES ({create_values})
+                        RETURNING id;
+                """
         return int(await self.database.execute(query))
     
-    async def update(self, id: int, update_data: dict) -> None:
-        query = self.table.update().where(self.table.c.id == id).values(**update_data)
-        await self.database.execute(query)
+    async def update(self, id: int, update_data: dict) -> int:
+        update_params = ", ".join("{}='{}'".format(key, value) for key, value in update_data.items())
+
+        query = f"""UPDATE {self.table} SET {update_params} RETURNING id;"""
+        return int(await self.database.execute(query))
 
     async def delete(self,id: int) -> None:
         query = self.table.delete().where(self.table.c.id == id)

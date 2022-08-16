@@ -117,7 +117,7 @@ class UserAuthService:
     def __init__(self, user_repository: UserRepository) -> None:
         self._user_repository = user_repository
     
-    def verify_password(self, introduced_password, hashed_password) -> bool:
+    def _verify_password(self, introduced_password, hashed_password) -> bool:
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         return pwd_context.verify(introduced_password, hashed_password)
     
@@ -131,7 +131,7 @@ class UserAuthService:
         if user is None:
             return False
 
-        if not self.verify_password(
+        if not self._verify_password(
             introduced_password=user_data.get('password', ''), 
             hashed_password=user.password
         ):

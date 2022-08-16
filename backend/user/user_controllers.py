@@ -76,7 +76,7 @@ async def registration(
         'refresh_token': refresh_token
     }
 
-    responce = JSONResponse(content=responce_data)
+    responce = JSONResponse(content=responce_data, status_code=status.HTTP_201_CREATED)
     responce.set_cookie(key='refresh_token', value=refresh_token, httponly=True, max_age=60*60*24*30)
     return responce
 
